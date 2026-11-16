@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: aws-parameterstore:/ch4/prod/   # 파라미터 스토어의 해당 경로 아래에서 환경변수 import
   jpa:
     hibernate:
       ddl-auto: validate
