@@ -1,3 +1,16 @@
 spring:
   application:
     name: nbcam_ch4
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    # driver-class-name, url을 통한 자동 추적
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health  # 기본값 (헬스 체크를 위한 엔드포인트 제공)
