@@ -42,6 +42,7 @@ dependencies {
 
     // AWS
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-parameter-store'
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
 
     // test
     testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'
