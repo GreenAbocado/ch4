@@ -7,10 +7,13 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 public class GlobalExceptionHandler {
 
 	@ExceptionHandler({HttpMessageNotReadableException.class,
-		MethodArgumentTypeMismatchException.class})
+		MethodArgumentTypeMismatchException.class,
+		MultipartException.class, // MultiPart 형식 오류, 용량 초과, 파싱 등
+		MissingServletRequestPartException.class})	// 해당 MultiPartFile 누락
 	public ResponseEntity<ErrorResponse> handleFormatException(Exception e) {
 		ErrorCode errorCode = ErrorCode.REQUEST_FORMAT_INVALID;
 		log.warn("Exception: {} | 형식 오류 | ex: {}", errorCode.getCode(), e.getClass().getSimpleName());
