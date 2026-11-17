@@ -17,8 +17,10 @@ public enum ErrorCode {
 	REQUEST_MEDIA_INVALID(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "G005", "지원하지 않는 미디어 타입입니다."),
 
 	SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "G500", "서버 내부 오류입니다."),
+	FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "G501", "파일 업로드를 실패하였습니다"),
 
-	MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "M001", "팀원을 찾을 수 없습니다.");
+	MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "M001", "팀원을 찾을 수 없습니다."),
+	MEMBER_PROFILE_NOT_FOUND(HttpStatus.NOT_FOUND, "M002", "프로필 이미지가 존재하지 않습니다.");
 
 	private final HttpStatus httpStatus;
 	private final String code;

@@ -29,6 +29,8 @@ public class Member {
 	@Column(length = 4)
 	private Mbti mbti;
 
+	private String profileImgKey;
+
 	public static Member of(String name, int age, Mbti mbti) {
 		return new Member(name, age, mbti);
 	}
@@ -37,5 +39,9 @@ public class Member {
 		this.name = name;
 		this.age = age;
 		this.mbti = mbti;
+	}
+
+	public void updateProfileImgKey(String key) {
+		this.profileImgKey = key;
 	}
 }

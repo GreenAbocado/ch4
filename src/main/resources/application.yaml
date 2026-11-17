@@ -6,12 +6,19 @@ spring:
     aws:
       region:
         static: ap-northeast-2
+      s3:
+        bucket: ${BUCKET_NAME} # 로컬과 EC2 다른 버킷 사용
 
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     # driver-class-name, url을 통한 자동 추적
+
+  servlet:
+    multipart:
+      max-file-size: 10MB # 파일 1개의 최대 크기 제한 (기본값 1MB)
+      max-request-size: 10MB  # multipart 데이터 전체의 최대 크기 제한 (기본값 10MB)
 
 management:
   endpoints:
