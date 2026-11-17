@@ -78,3 +78,29 @@
 ### 🔗 http://43.201.16.169:8080/actuator/info (진행에 따라 없어질 수 있습니다.)
 
 ![Actuator_Info](/img/LV2_Actuator_Info.png)
+
+<br>
+
+## LV 3 - 프로필 사진 기능 추가와 권한 관리
+
+![Bucket](/img/LV3_Bucket.png)
+
+**S3 버킷 생성**
+- 로컬(S3Service 동작 확인용), 운영 버킷을 분리하였습니다.
+  - 데이터가 섞이는 것을 방지하고, 액세스키가 유출돼도 운영에는 영향이 없게 합니다.
+- 버킷 이름은 환경 변수로 주입합니다. (로컬 : IDE, 운영 : parameter store)
+
+**IAM**
+- 버킷별로 필요한 최소 권한 (s3:GetObject, s3:PutObject, s3:DeleteObject)만 담은 Policy를 각각 생성하였습니다.
+  - 업로드, PreSignedURL발급용, 업데이트 시 기존 이미지 삭제
+- 로컬은 IAM User에 로컬 버킷 Policy, 운영은 IAM Role에 운영 버킷 Policy를 적용하여 S3에 접근합니다.
+    - 운영의 경우 장기가 아닌 임시 자격 증명을 사용해서 보안성을 높였습니다.
+
+### [ 📌 제출 ] S3 접근 성공 스크린샷
+운영에서는 임시 자격증명의 갱신으로 인해 PreSignedURL을 7일간 유지할 수 없어 스크린샷을 첨부했습니다.
+
+**PreSignedURL 취득**
+![S3_Provide](/img/LV3_Provide_URL.png)
+
+**브라우저에서 접근**
+![S3_Download](/img/LV3_Download.png)
