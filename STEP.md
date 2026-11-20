@@ -122,3 +122,25 @@
 - CI 파이프라인: push, PR 시 테스트/빌드를 자동으로 수행하여 코드의 안전성을 향상시킵니다.
 - CD 파이프라인: ASG의 인스턴스 리프레시를 통한 무중단 배포 예정이라 LV5에서 추가할 예정입니다.
     - 현재는 EC2에서 수동으로 pull해서 가져옵니다.
+
+### [ 📌 제출 ] GitHub Actions 워크플로우 정상 수행 & 배포 후 Docker 컨테이너 정상 실행
+
+**GitHub Actions 워크플로우 정상 수행**
+![GitHub Actions 워크플로우](/img/LV4_GitHub_Actions.png)
+
+CI Pipeline #2의 경우, DockerHub에 로그인 하는 과정에서 오류가 생겼습니다.
+
+GitHub Secrets에 저장한 DockerHub 토큰의 이름(DOCKERHUB_SECRET_KEY)과  
+deploy.yaml(워크플로우)에서 사용한 이름(DOCKER_SECRET_KEY)이 달라 생긴 문제였습니다.
+
+새로 브랜치를 파서 수정 후 main에 PR -> merge(push)하는 과정에서 2번의 workflow가 각각 더 수행되었습니다.
+
+**Docker 컨테이너 정상 실행**
+![Docker 컨테이너 정상 실행](/img/LV4_Docker_Run.png)
+
+DockerHub에 로그인 후 CI 파이프라인을 통해 올려진 이미지를 pull하였습니다.  
+이후, 컨테이너를 실행하면서 8080포트와 EC2의 8080포트를 매핑하여 네트워크 통신을 가능하게 하였고  
+서버가 운영환경으로 띄워지도록 도커 컨테이너의 환경변수로 SPRING_PROFILES_ACTIVE에 prod를 주입하여줬습니다.
+
+이후 ECR로 전환할 예정이라,  
+Docker Hub의 저장소 및 토큰, GitHub Variables/Secrets 등 사용하지 않을 부분들을 제거하였습니다.
