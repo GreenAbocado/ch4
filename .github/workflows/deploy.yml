@@ -4,8 +4,12 @@ name: CI Pipeline
 on:
   push:
     branches: [main]
+    paths-ignore: # 문서화 작업의 경우 불필요하게 도커 이미지 빌드/푸시(deploy job) 진행X
+      - '**.md'
+      - 'img/**'
   pull_request:
     branches: [main]
+    # 브랜치룰에 CI(buid job) 통과 필수 설정 - 모든 작업 build job 수행 필수
 
 permissions:
   contents: read # 코드 체크아웃용
