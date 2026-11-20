@@ -104,3 +104,21 @@
 
 **브라우저에서 접근**
 ![S3_Download](/img/LV3_Download.png)
+
+### LV 4 - Docker & CI/CD 파이프라인 구축
+
+**DockerHub**
+- 운영과 로컬을 동일한 환경으로 맞추기 위해 도커 이미지 배포를 선택하였습니다.
+  - EC2에서 격리된 컨테이너를 띄워 환경 충돌 없이 로컬과 동일한 환경으로 실행됩니다.
+- 요구사항에 맞춰 이미지 레포지토리로 DockerHub를 선택하였습니다.
+- DockerHub의 토큰을 2개 생성하고 권한을 각각 부여합니다.
+  - GitHub Actions -> DockerHub : Read & Write (Write Only는 미존재)
+  - EC2 <- DockerHub : Read Only
+- GitHub Secrets에 토큰 값을, Variables에 유저명과 저장소명을 저장하고 워크플로우에서 참조합니다.
+- 이후 ECR로 교체 예정이라 만료시간을 짧게 잡았습니다.
+
+**GitHub Actions**
+- 워크플로우 작성을 통해 CI/CD 파이프라인을 구축합니다.
+- CI 파이프라인: push, PR 시 테스트/빌드를 자동으로 수행하여 코드의 안전성을 향상시킵니다.
+- CD 파이프라인: ASG의 인스턴스 리프레시를 통한 무중단 배포 예정이라 LV5에서 추가할 예정입니다.
+    - 현재는 EC2에서 수동으로 pull해서 가져옵니다.

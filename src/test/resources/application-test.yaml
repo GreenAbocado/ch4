@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create
+  cloud:
+    aws:
+      credentials:
+        access-key: test
+        secret-key: test
+      s3:
+        bucket: test
+info:
+  name: test
