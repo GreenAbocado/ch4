@@ -105,6 +105,8 @@
 **브라우저에서 접근**
 ![S3_Download](/img/LV3_Download.png)
 
+<br>
+
 ### LV 4 - Docker & CI/CD 파이프라인 구축
 
 **DockerHub**
@@ -144,3 +146,24 @@ DockerHub에 로그인 후 CI 파이프라인을 통해 올려진 이미지를 p
 
 이후 ECR로 전환할 예정이라,  
 Docker Hub의 저장소 및 토큰, GitHub Variables/Secrets 등 사용하지 않을 부분들을 제거하였습니다.
+
+<br>
+
+### DockerHub -> ECR 도커 이미지 저장소 변경
+
+기존 DockerHub의 경우, 토큰 갱신, 유출 대비 등 토큰 관리의 복잡도가 존재했습니다.  
+이에 DockerHub에서 AWS ECR로 저장소를 변경하고 인증방식을 OIDC/IAM Role로 변경하였습니다.
+
+이를 통해, 사용자가 토큰을 관리하지 않아도 GitHub이 발급해주는 OIDC 토큰과 AWS의 IAM Role을 통한
+임시 자격 증명으로 GitHub Actions에서 간편하게 ECR에 접근할 수 있게 하였습니다.  
+
+또한 EC2, ECR이 같은 AWS 리전 내에 존재하여 내부망으로 통신하므로
+DockerHub보다 더 빠르게 이미지를 가져와 배포시간이 단축됩니다.
+
+**OIDC/IAM Role 설정**
+- AWS에서 GitHub Actions로부터 OIDC 토큰을 받기 위해 OIDC 공급자에 GitHub Actions를 추가하였습니다.
+- IAM Role을 생성하고 신뢰관계 및 권한을 설정하였습니다.
+  - 권한에는 AmazonEC2ContainerRegistryPowerUser를 추가하였습니다.
+    - 우선 전체적인 구현이 목적이라 실제 권한보다 넓게 잡았습니다.
+
+<br>
