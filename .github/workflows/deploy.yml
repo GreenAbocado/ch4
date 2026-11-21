@@ -9,16 +9,16 @@ on:
       - 'img/**'
   pull_request:
     branches: [main]
-    # 브랜치룰에 CI(buid job) 통과 필수 설정 - 모든 작업 build job 수행 필수
-
-permissions:
-  contents: read # 코드 체크아웃용
+    # 브랜치룰에 PR시 CI(buid job) 통과 필수 설정 - 모든 작업 build job 수행 필수
 
 jobs:
 
   # 테스트 + 빌드 수행 (main PR, main push)
   build:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read # 코드 체크아웃용
 
     steps:
       - name: Checkout code
@@ -50,6 +50,10 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
+    permissions:
+      id-token: write # OIDC 토큰 발급용. 이후 AWS에서 검증 후 임시자격증명 발급
+      contents: read # 코드 체크아웃용 (Dockerfile 필요)
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -60,17 +64,21 @@ jobs:
           name: jar
           path: build/libs  # 해당 경로에 jar 파일 다운로드 (Dockerfile COPY 경로와 동기화 필수)
 
-
-      # DockerHub 로그인
-      - name: Login to Docker Hub
-        uses: docker/login-action@v4
+      # OIDC를 통해 임시자격증명 취득
+      - name: Configure AWS Credential
+        uses: aws-actions/configure-aws-credentials@v6.3.0
         with:
-          username: ${{vars.DOCKERHUB_USERNAME}}
-          password: ${{secrets.DOCKERHUB_SECRET_KEY}}
+          role-to-assume: ${{vars.AWS_ROLE_ARN}}
+          aws-region: ${{vars.AWS_REGION}}
 
+      # Docker 로그인 (임시자격증명으로 로그인 토큰 요청 후 도커 로그인)
+      - name: Login to Amazon ECR Private
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build & Push Docker image
         run: |
-          IMAGE_REFERENCE=${{vars.DOCKERHUB_USERNAME}}/${{vars.DOCKERHUB_REPOSITORY}}:$(echo ${{github.sha}} | cut -c1-7)
+          IMAGE_REFERENCE=${{vars.ECR_URI}}:$(echo ${{github.sha}} | cut -c1-7)
           docker build --platform linux/arm64 -t $IMAGE_REFERENCE .
           docker push $IMAGE_REFERENCE
+
+      # 이후 인스턴스 리프레쉬를 이용한 CD 워크 플로우 추가
