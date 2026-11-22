@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: CI/CD Pipeline
 
 # main 브랜치 push 또는 PR
 on:
@@ -44,7 +44,7 @@ jobs:
           path: build/libs/*.jar  # 해당 경로에 jar파일 업로드 (build.gradle에서 plain은 빌드 되지 않도록 설정)
 
 
-  # build job + DockerHub 업로드 (main push일 때만)
+  # build job + ECR 업로드 + SSM 이미지 태그 put + ASG 인스턴스 리프레시 (main push일 때만)
   deploy:
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -64,6 +64,9 @@ jobs:
           name: jar
           path: build/libs  # 해당 경로에 jar 파일 다운로드 (Dockerfile COPY 경로와 동기화 필수)
 
+      - name: Get Short SHA
+        run: echo "IMAGE_TAG=$(echo ${{github.sha}} | cut -c1-7)" >> $GITHUB_ENV
+
       # OIDC를 통해 임시자격증명 취득
       - name: Configure AWS Credential
         uses: aws-actions/configure-aws-credentials@v6.3.0
@@ -77,8 +80,46 @@ jobs:
 
       - name: Build & Push Docker image
         run: |
-          IMAGE_REFERENCE=${{vars.ECR_URI}}:$(echo ${{github.sha}} | cut -c1-7)
+          IMAGE_REFERENCE=${{vars.ECR_URI}}:$IMAGE_TAG
           docker build --platform linux/arm64 -t $IMAGE_REFERENCE .
           docker push $IMAGE_REFERENCE
 
-      # 이후 인스턴스 리프레쉬를 이용한 CD 워크 플로우 추가
+      # SSM Parameter Store에 이미지 태그 저장 (버전별로 저장 가능)
+      - name: Save Image Tag To SSM
+        run: |
+          aws ssm put-parameter \
+            --name ${{vars.SSM_TAG_PARAMETER_NAME}} \
+            --value $IMAGE_TAG \
+            --type String \
+            --overwrite
+      
+      # ASG 인스턴스 새로고침
+      - name: Start Instance Refresh
+        run: |
+          REFRESH_ID=$(aws autoscaling start-instance-refresh \
+          --auto-scaling-group-name ${{vars.ASG_NAME}} \
+          --preferences '{"MinHealthyPercentage": 100, "InstanceWarmup": 120}' \
+          --query 'InstanceRefreshId' \
+          --output text)
+          echo "refresh_id=${REFRESH_ID}" >> $GITHUB_ENV
+
+      # ASG 인스턴스 새로고침 상태 확인
+      - name: Wait For Instance Refresh
+        run: |
+          for i in $(seq 1 40); do
+            STATUS=$(aws autoscaling describe-instance-refreshes \
+              --auto-scaling-group-name ${{vars.ASG_NAME}} \
+              --instance-refresh-ids $refresh_id \
+              --query 'InstanceRefreshes[0].Status' \
+              --output text)
+            echo "시도 ${i}/40 - 상태: $STATUS"
+            
+            case $STATUS in
+              Successful) echo "배포 완료"; exit 0 ;;
+              Failed|Cancelled|RollbackInProgress|RollbackFailed|RollbackSuccessful)
+                echo "배포 실패: $STATUS"; exit 1 ;;
+            esac
+            sleep 30
+          done
+          echo "타임아웃"
+          exit 1
