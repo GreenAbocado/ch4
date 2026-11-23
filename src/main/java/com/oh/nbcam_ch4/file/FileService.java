@@ -1,12 +1,15 @@
-package com.oh.nbcam_ch4.service;
+package com.oh.nbcam_ch4.file;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.UUID;
 
+import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.oh.nbcam_ch4.common.constant.S3KeyPrefix;
 import com.oh.nbcam_ch4.common.exception.CustomException;
 import com.oh.nbcam_ch4.common.exception.ErrorCode;
 
@@ -20,30 +23,49 @@ public class FileService {
 
 	private final String bucket;
 	private final S3Template s3Template;
-
 	private final String cloudFrontDomain;
+	private final Tika tika = new Tika();
 
 	public FileService(@Value("${spring.cloud.aws.s3.bucket}") String bucket,
 		S3Template s3Template,
 		@Value("${spring.cloud.aws.cloudfront.domain}") String cloudFrontDomain) {
+
 		this.bucket = bucket;
 		this.s3Template = s3Template;
 		this.cloudFrontDomain = cloudFrontDomain;
 	}
 
-	// TODO: 파일 형식 검증
 	public String upload(MultipartFile file, S3KeyPrefix keyPrefix) {
-		// UUID를 통해 키 중복 방지
-		String key = keyPrefix.getPrefix() + UUID.randomUUID() + "_" + file.getOriginalFilename();
-		ObjectMetadata metadata = ObjectMetadata.builder().contentType(file.getContentType()).build();
-		try {
-			s3Template.upload(bucket, key, file.getInputStream(), metadata);
+
+		FileType fileType = extractFileType(file);
+
+		// UUID를 통해 중복 없는 파일명 생성, 서버에서 파일 형식 검증 후 직접 확장자, Content-Type 세팅
+		String key = keyPrefix.getPrefix() + UUID.randomUUID() + fileType.getExtension();
+		ObjectMetadata metadata = ObjectMetadata.builder()
+				.contentType(fileType.getContentType())
+				.build();
+
+		try (InputStream in = file.getInputStream()) {
+			s3Template.upload(bucket, key, in, metadata);
 			log.info("S3 업로드 완료 key = {}", key);
 			return key;
 
 		} catch (Exception e) {
 			log.error("S3 업로드 실패 key = {}", key, e);
 			throw new CustomException(ErrorCode.FILE_UPLOAD_FAILED);
+		}
+	}
+
+	private FileType extractFileType(MultipartFile file) {
+
+		if (file == null || file.isEmpty()) {
+			throw new CustomException(ErrorCode.REQUEST_FILE_EMPTY);
+		}
+
+		try (InputStream in = file.getInputStream()) {
+			return FileType.fromContentType(tika.detect(in));
+		} catch (IOException e) {
+			throw new UncheckedIOException("파일 읽기 실패", e);
 		}
 	}
 
