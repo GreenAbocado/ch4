@@ -51,9 +51,7 @@ public class FileService {
 		return cloudFrontDomain + "/" + key;
 	}
 
-	/* DB에 key 업데이트 실패 시 롤백 전에
-	   S3에 저장한 새로운 파일도 지워주기 위해 호출 (고아 객체 지우기 위함)
-
+	/* 이미지 정리용 메서드 (profileImgKey 커밋 성공 시 기존 이미지 제거, 롤백 시 새로운 이미지 제거)
 	   실패 시 고아 객체 판별을 위해 로깅 */
 	public void delete(String key) {
 		try {
