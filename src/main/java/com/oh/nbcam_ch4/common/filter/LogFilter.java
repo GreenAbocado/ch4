@@ -1,0 +1,28 @@
+package com.oh.nbcam_ch4.common.filter;
+
+import java.io.IOException;
+
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+
+@Component
+@Slf4j
+public class LogFilter extends OncePerRequestFilter {
+
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+		FilterChain filterChain) throws ServletException, IOException {
+
+		log.info("[API - LOG] request: {} {}", request.getMethod(), request.getRequestURI());
+
+		filterChain.doFilter(request, response);
+
+		log.info("[API - LOG] response : {}", response.getStatus());
+	}
+}
