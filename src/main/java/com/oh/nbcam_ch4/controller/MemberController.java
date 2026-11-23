@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.oh.nbcam_ch4.dto.MemberProfileResponse;
 import com.oh.nbcam_ch4.dto.MemberRequest;
 import com.oh.nbcam_ch4.dto.MemberResponse;
+import com.oh.nbcam_ch4.facade.MemberFileFacade;
 import com.oh.nbcam_ch4.service.MemberService;
 
 import jakarta.validation.Valid;
@@ -25,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/members")
 public class MemberController {
 	private final MemberService memberService;
+	private final MemberFileFacade memberFileFacade;
 
 	@PostMapping
 	public ResponseEntity<MemberResponse> saveMember(@Valid @RequestBody MemberRequest request) {
@@ -36,7 +38,7 @@ public class MemberController {
 	public ResponseEntity<MemberProfileResponse> updateProfileImg(@RequestParam MultipartFile file, @
 		Min(0) @PathVariable Long id) {
 		return ResponseEntity.status(HttpStatus.OK)
-				.body(memberService.updateProfileImg(file, id));
+				.body(memberFileFacade.updateProfileImg(file, id));
 	}
 
 	@GetMapping("/{id}")
@@ -48,6 +50,6 @@ public class MemberController {
 	@GetMapping("/{id}/profile-image")
 	public ResponseEntity<MemberProfileResponse> getProfileImg(@Min(0) @PathVariable Long id) {
 		return ResponseEntity.status(HttpStatus.OK)
-			.body(memberService.getProfileImg(id));
+			.body(memberFileFacade.getProfileImg(id));
 	}
 }
