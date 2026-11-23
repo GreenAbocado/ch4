@@ -3,9 +3,9 @@ package com.oh.nbcam_ch4.facade;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.oh.nbcam_ch4.common.constant.S3KeyPrefix;
+import com.oh.nbcam_ch4.file.S3KeyPrefix;
 import com.oh.nbcam_ch4.dto.MemberProfileResponse;
-import com.oh.nbcam_ch4.service.FileService;
+import com.oh.nbcam_ch4.file.FileService;
 import com.oh.nbcam_ch4.service.MemberService;
 
 import lombok.RequiredArgsConstructor;

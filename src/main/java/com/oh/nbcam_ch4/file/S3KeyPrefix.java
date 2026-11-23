@@ -1,4 +1,4 @@
-package com.oh.nbcam_ch4.common.constant;
+package com.oh.nbcam_ch4.file;
 
 import lombok.Getter;
 
