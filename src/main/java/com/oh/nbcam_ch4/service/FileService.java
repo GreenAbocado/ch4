@@ -1,6 +1,5 @@
 package com.oh.nbcam_ch4.service;
 
-import java.time.Duration;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -17,15 +16,19 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class S3Service {
+public class FileService {
 
-	private static final Duration EXPIRATION_TIME = Duration.ofMinutes(10);
 	private final String bucket;
 	private final S3Template s3Template;
 
-	public S3Service(@Value("${spring.cloud.aws.s3.bucket}") String bucket, S3Template s3Template) {
+	private final String cloudFrontDomain;
+
+	public FileService(@Value("${spring.cloud.aws.s3.bucket}") String bucket,
+		S3Template s3Template,
+		@Value("${spring.cloud.aws.cloudfront.domain}") String cloudFrontDomain) {
 		this.bucket = bucket;
 		this.s3Template = s3Template;
+		this.cloudFrontDomain = cloudFrontDomain;
 	}
 
 	// TODO: 파일 형식 검증
@@ -45,7 +48,7 @@ public class S3Service {
 	}
 
 	public String getDownloadURL(String key) {
-		return s3Template.createSignedGetURL(bucket, key, EXPIRATION_TIME).toString();
+		return cloudFrontDomain + "/" + key;
 	}
 
 	/* DB에 key 업데이트 실패 시 롤백 전에
