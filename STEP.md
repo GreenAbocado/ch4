@@ -265,3 +265,17 @@ SSM 세션 매니저로 접속 후 docker ps로 컨테이너 정상 상태 확�
 
 ### 타겟 그룹
 ![Target Group](/img/LV5_Target_Group.png)
+
+<br>
+
+### LV 6 - 글로벌 성능 최적화 (CloudFront CDN)
+
+빠른 프로필 사진 로딩을 위해 분산된 Edge Location에 이미지를 캐싱합니다.
+
+- 기존 S3 버킷을 오리진으로 등록하여 캐싱되어있지 않을 때 S3에서 가져옵니다.
+- CloudFront 배포 생성 중 Route 53 도메인 연결 및 인증서 발급을 수행합니다.
+
+### [ 📌 제출 ] CloudFront 이미지 URL
+
+### 🔗 https://static.abocado.click/uploads/profile-img/ea0cac46-4f57-4de7-9e1f-bf5d28cbf128_IMG_4260.JPG
+(업로드한 프로필 이미지 중 하나)
