@@ -48,7 +48,7 @@ public class FileService {
 		try (InputStream in = file.getInputStream()) {
 			s3Template.upload(bucket, key, in, metadata);
 			log.info("S3 업로드 완료 key = {}", key);
-			return key;
+			return getDownloadURL(key);
 
 		} catch (Exception e) {
 			log.error("S3 업로드 실패 key = {}", key, e);
