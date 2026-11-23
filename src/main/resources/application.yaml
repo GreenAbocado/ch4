@@ -8,6 +8,8 @@ spring:
         static: ap-northeast-2
       s3:
         bucket: ${BUCKET_NAME} # 로컬과 EC2 다른 버킷 사용
+      cloudfront:
+        domain: ${CLOUDFRONT_DOMAIN}
 
   datasource:
     url: ${DB_URL}

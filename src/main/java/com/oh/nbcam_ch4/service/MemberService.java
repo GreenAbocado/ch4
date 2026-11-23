@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MemberService {
 	private final MemberRepository memberRepository;
-	private final S3Service s3Service;
+	private final FileService fileService;
 
 	@Transactional
 	public MemberResponse saveMember(MemberRequest request) {
@@ -36,21 +36,21 @@ public class MemberService {
 	//  -> 위 로직을 트랜잭션 밖에서 조율 필요
 	@Transactional
 	public MemberProfileResponse updateProfileImg(MultipartFile file, Long memberId) {
-		String key = s3Service.upload(file, S3KeyPrefix.PROFILE_IMG);
+		String key = fileService.upload(file, S3KeyPrefix.PROFILE_IMG);
 
 		try {
 			Member member = findMemberById(memberId);
 			String oldKey = member.getProfileImgKey();
 			member.updateProfileImgKey(key);
 			if (oldKey != null) {
-				s3Service.delete(oldKey); // 이후 프록시 객체에서 롤백할 경우 DB가 존재하지 않는 파일 키를 보유하게 됨
+				fileService.delete(oldKey); // 이후 프록시 객체에서 롤백할 경우 DB가 존재하지 않는 파일 키를 보유하게 됨
 			}
 
 		} catch (Exception e) {	// 프록시 객체에서 수행되는 커밋 단계 예외는 잡지 못함
-			s3Service.delete(key);
+			fileService.delete(key);
 			throw e;
 		}
-		return new MemberProfileResponse(s3Service.getDownloadURL(key));
+		return new MemberProfileResponse(fileService.getDownloadURL(key));
 	}
 
 	@Transactional(readOnly = true)
@@ -64,7 +64,7 @@ public class MemberService {
 		if (key == null) {
 			throw new CustomException(ErrorCode.MEMBER_PROFILE_NOT_FOUND);
 		}
-		return new MemberProfileResponse(s3Service.getDownloadURL(key));
+		return new MemberProfileResponse(fileService.getDownloadURL(key));
 	}
 
 	private Member findMemberById(Long memberId) {

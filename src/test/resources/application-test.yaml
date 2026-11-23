@@ -13,5 +13,7 @@ spring:
         secret-key: test
       s3:
         bucket: test
+      cloudfront:
+        domain: test
 info:
   name: test
