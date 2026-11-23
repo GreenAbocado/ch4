@@ -277,5 +277,5 @@ SSM 세션 매니저로 접속 후 docker ps로 컨테이너 정상 상태 확�
 
 ### [ 📌 제출 ] CloudFront 이미지 URL
 
-### 🔗 https://static.abocado.click/uploads/profile-img/ea0cac46-4f57-4de7-9e1f-bf5d28cbf128_IMG_4260.JPG
+### 🔗 https://static.abocado.click/uploads/profile-img/9696981a-2c40-4c26-8422-27be4b4c42f6.jpg
 (업로드한 프로필 이미지 중 하나)
